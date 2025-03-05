@@ -1,17 +1,90 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+    <ion-title>Tab 2</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-sm="6" size-md="4" size-lg="3" *ngFor="let persona of personas; index as i">
+        <ion-card>
+          <img [src]="persona.foto" alt="Foto" style="width: 100%;" />
+          <ion-card-header>
+            <ion-card-title>{{ persona.nombre }}</ion-card-title>
+            <ion-card-subtitle><strong>Clase:</strong> {{ persona.clase }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p><strong>Género:</strong> {{ persona.genero }}</p>
+            <p><strong>Fecha:</strong> {{ persona.fecha }}</p>
+            <p><strong>PV:</strong> {{ persona.puntosDeVida }} | <strong>Fuerza:</strong> {{ persona.fuerza }}</p>
+          </ion-card-content>
+          <ion-button fill="clear" (click)="openModal(i)">Editar</ion-button>
+          <ion-button fill="clear" color="danger" (click)="deletePerson(i)">Eliminar</ion-button>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openModal()" color="success">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <!-- Modal HTML -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal">
+      <h2>{{ editIndex !== null ? 'Editar Persona' : 'Agregar Persona' }}</h2>
+
+      <form>
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="persona.nombre" name="nombre" required />
+
+        <!-- <label>Clase:</label>
+        <input type="text" [(ngModel)]="persona.clase" name="clase" required /> -->
+        <label>Clase:</label>
+        <select [(ngModel)]="persona.clase" name="clase" required>
+          <option value="" disabled selected>Seleccione una clase</option>
+          <option value="Vagante">Vagante</option>
+          <option value="Guerrero">Guerrero</option>
+          <option value="Héroe">Héroe</option>
+          <option value="Bandido">Bandido</option>
+          <option value="Astrólogo">Astrólogo</option>
+          <option value="Profeta">Profeta</option>
+          <option value="Samurái">Samurái</option>
+          <option value="Prisionero">Prisionero</option>
+          <option value="Prefiero no decir">Prefiero no decir</option>
+        </select>
+
+        <label>Género:</label>
+        <select [(ngModel)]="persona.genero" name="genero" required>
+          <option value="" disabled selected>Seleccione un género</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Femenino">Femenino</option>
+          <option value="Prefiero no decir">Prefiero no decir</option>
+        </select>
+
+        <label>Fecha de nacimiento:</label>
+        <input type="date" [(ngModel)]="persona.fecha" name="fecha" required />
+
+        <label>Puntos de Vida:</label>
+        <input type="number" [(ngModel)]="persona.puntosDeVida" name="puntosDeVida" min="1" max="100" required />
+
+        <label>Fuerza:</label>
+        <input type="number" [(ngModel)]="persona.fuerza" name="fuerza" min="1" max="100" required />
+
+        <label>Foto:</label>
+        <div class="photo-container">
+          <img *ngIf="persona.foto" [src]="persona.foto" alt="Foto tomada" />
+          <ion-button (click)="addPhotoToGallery()" color="warning">Tomar foto</ion-button>
+        </div>
+
+        <div class="modal-actions">
+          <ion-button (click)="closeModal()" color="danger">Cancelar</ion-button>
+          <ion-button (click)="savePerson()" color="success">Guardar</ion-button>
+        </div>
+      </form>
+    </div>
+  </div>
 </ion-content>

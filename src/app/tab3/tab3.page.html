@@ -1,17 +1,25 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 3
+      Buscar Jefes
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="filterBosses()"
+    placeholder="Buscar jefe...">
+  </ion-searchbar>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <ion-list>
+    <ion-item *ngFor="let boss of filteredBosses">
+      <ion-thumbnail slot="start">
+        <img [src]="boss.image" alt="Boss Image" />
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ boss.name }}</h2>
+        <p>{{ boss.description }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
 </ion-content>

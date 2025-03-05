@@ -1,0 +1,74 @@
+:root {
+    --modal-bg-light: white;
+    --modal-bg-dark: #1e1e1e;
+    --text-light: black;
+    --text-dark: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    .modal {
+        background: var(--modal-bg-dark);
+        color: var(--text-dark);
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .modal {
+        background: var(--modal-bg-light);
+        color: var(--text-light);
+    }
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.modal {
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal h2 {
+    margin-bottom: 20px;
+}
+
+.modal input,
+.modal select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+.photo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.modal-actions button {
+    padding: 10px;
+    cursor: pointer;
+}
