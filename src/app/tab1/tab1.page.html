@@ -1,17 +1,29 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      HOLA BORJA
-    </ion-title>
+    <ion-title>Perfil de Usuario</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <img src="assets/icon/favicon.png" alt="Imagen de prueba">
-  
+<ion-content>
+  <!-- Verificar si el usuario está disponible -->
+  <div *ngIf="user" class="user-info">
+    <div class="user-details">
+      <!-- Avatar -->
+      <ion-avatar class="user-avatar">
+        <img [src]="user.photoURL || 'assets/default-avatar.png'" alt="Imagen de perfil">
+      </ion-avatar>
+      <!-- Información del Usuario -->
+      <div class="user-text">
+        <h2>{{ user.displayName || 'Nombre no disponible' }}</h2>
+        <p>Correo electrónico: {{ user.email }}</p>
+        <p>UID: {{ user.uid }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Si no hay usuario, mostrar mensaje -->
+  <div *ngIf="!user" class="login-message">
+    <h2>No has iniciado sesión</h2>
+    <p>Por favor, inicia sesión para ver tu perfil.</p>
+  </div>
 </ion-content>

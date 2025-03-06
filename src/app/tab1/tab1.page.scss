@@ -1,0 +1,43 @@
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .user-avatar {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 15px;
+  }
+  
+  .user-text {
+    margin-top: 10px;
+  }
+  
+  .user-text h2 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+  
+  .user-text p {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .login-message {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+  
