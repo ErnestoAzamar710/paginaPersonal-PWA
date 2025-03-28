@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { getAuth, signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
-import { Preferences } from '@capacitor/preferences'; // Importar para almacenar datos localmente
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
+import { INotification } from '../models/notification.model';
+import { NotificationService } from '../services/notification.service';
+import { Preferences } from '@capacitor/preferences';
 
 @Component({
   selector: 'app-login',
@@ -11,63 +12,56 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./login.page.scss'],
   imports: [IonicModule, FormsModule]
 })
-export class LoginPage implements OnInit {
-  user: User | null = null; // Variable para almacenar los datos del usuario
+export class LoginPage {
+  private notificationService = inject(NotificationService);
+  private toastController = inject(ToastController);
+  private router = inject(Router);
+  
+  user = {
+    displayName: '',
+    email: '',
+    uid: 'UID_EJEMPLO',
+    photoURL: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
+  };
 
-  constructor(private router: Router) { }
-
-  async ngOnInit() {
-    // Cargar información del usuario almacenado localmente
-    const storedUser = await Preferences.get({ key: 'user' });
-
-    if (storedUser.value) {
-      // Si el usuario está almacenado
-      this.user = JSON.parse(storedUser.value);
-      console.log('Usuario cargado:', this.user);
-      this.router.navigate(['/tabs']); // Redirigir si el usuario está almacenado
-    } else {
-      console.log('No hay usuario almacenado');
-    }
-  }
-
-  // Función para guardar los datos completos del usuario en Preferences
-  async saveUserData(user: { displayName: string, email: string, uid: string, photoURL?: string }) {
-    // Guardar la información completa del usuario en Preferences
+  async login() {
+    // Guardar usuario
     await Preferences.set({
       key: 'user',
-      value: JSON.stringify(user) // Guardar todo el objeto de usuario
+      value: JSON.stringify(this.user)
     });
-
-    // Verificar si el valor se guardó correctamente
-    const storedUser = await Preferences.get({ key: 'user' });
-    if (storedUser.value) {
-      console.log('Datos del usuario guardados correctamente:', JSON.parse(storedUser.value));
-    } else {
-      console.error('Error al guardar los datos del usuario en Preferences');
+  
+    // Crear fecha válida (2 segundos en el futuro)
+    const notificationDate = new Date();
+    notificationDate.setSeconds(notificationDate.getSeconds() + 2);
+  
+    const notification: INotification = {
+      title: 'Inicio de sesión exitoso',
+      body: `Bienvenido ${this.user.email}`,
+      date: notificationDate.toISOString(), // Usar ISO string
+      url: 'https://tudominio.com/inicio'
+    };
+  
+    try {
+      const success = await this.notificationService.sendNotification(notification);
+      if (success) {
+        this.router.navigate(['/tabs']);
+      } else {
+        await this.showToast('No se pudo enviar la notificación', 'warning');
+      }
+    } catch (error) {
+      await this.showToast('Error al comunicarse con el servidor', 'danger');
+      console.error('Error completo en login:', error);
     }
   }
-
-  // Inicio de sesión con Google
-  async signInWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    const auth = getAuth();
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Guardar todos los datos del usuario en Preferences
-      await this.saveUserData({
-        displayName: user.displayName || '',
-        email: user.email || '',
-        uid: user.uid,
-        photoURL: user.photoURL || ''
-      });
-
-      // Redirigir a la página de tabs
-      this.router.navigate(['/tabs']);
-    } catch (error) {
-      console.error('Error durante el inicio de sesión:', error);
-    }
+  
+  private async showToast(message: string, color: 'success' | 'warning' | 'danger' = 'success') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color
+    });
+    await toast.present();
   }
 }

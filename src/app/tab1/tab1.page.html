@@ -10,21 +10,23 @@
     <div class="user-details">
       <!-- Avatar -->
       <ion-avatar class="user-avatar">
-        <img [src]="user.photoURL || 'assets/default-avatar.png'" alt="Imagen de perfil">
+        <img [src]="user.photoURL" [alt]="user.displayName">
       </ion-avatar>
       <!-- Información del Usuario -->
       <div class="user-text">
-        <h2>{{ user.displayName || 'Nombre no disponible' }}</h2>
+        <h2>{{ user.displayName }}</h2>
         <p>Correo electrónico: {{ user.email }}</p>
         <p>UID: {{ user.uid }}</p>
       </div>
     </div>
   </div>
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button color="danger" (click)="logout()">
       <ion-icon name="exit"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
   <!-- Si no hay usuario, mostrar mensaje -->
   <div *ngIf="!user" class="login-message">
     <h2>No has iniciado sesión</h2>
