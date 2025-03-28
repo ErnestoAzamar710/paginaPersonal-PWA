@@ -92,7 +92,7 @@
         <!-- Sección de foto -->
         <label>Foto:</label>
         <div class="photo-container">
-          <img *ngIf="persona.foto" [src]="persona.foto" alt="Foto tomada" />
+          <img [src]="persona.foto" loading="lazy" alt="Foto" *ngIf="persona.foto">
           <ion-button (click)="addPhotoToGallery()" color="warning">Tomar foto</ion-button>
         </div>
 

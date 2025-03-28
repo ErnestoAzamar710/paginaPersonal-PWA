@@ -1,77 +1,111 @@
 import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
-import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
+
+interface PhotoData {
+  webviewPath: string;
+  base64: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class PhotoService {
-  photos: { filePath: string; webviewPath: string; base64: string }[] = [];
+  photos: PhotoData[] = [];
 
   constructor() {
     this.loadStoredPhotos();
   }
 
-  async addNewToGallery(): Promise<{ filePath: string; webviewPath: string; base64: string } | null> {
+  async addNewToGallery(): Promise<PhotoData | null> {
     try {
-      const capturedPhoto = await Camera.getPhoto({
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
-        quality: 90
-      });
-
-      if (!capturedPhoto || !capturedPhoto.webPath) {
-        console.error('No se obtuvo una imagen válida.');
-        return null;
+      // Verificar permisos primero
+      const permissions = await Camera.checkPermissions();
+      if (permissions.camera !== 'granted' || permissions.photos !== 'granted') {
+        const newPermissions = await Camera.requestPermissions();
+        if (newPermissions.camera !== 'granted' || newPermissions.photos !== 'granted') {
+          throw new Error('Permisos de cámara no concedidos');
+        }
       }
 
-      const savedPhoto = await this.savePhoto(capturedPhoto);
-      this.photos.unshift(savedPhoto);
-
-      // Guardar en Preferences
-      Preferences.set({
-        key: 'photos',
-        value: JSON.stringify(this.photos),
+      const capturedPhoto = await Camera.getPhoto({
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+        quality: 90,
+        allowEditing: false,
+        correctOrientation: true,
+        width: 800,
+        height: 800
       });
 
-      return savedPhoto;
-    } catch (error) {
-      console.error('Error al tomar la foto:', error);
+      if (!capturedPhoto?.base64String) {
+        throw new Error('No se obtuvo imagen válida');
+      }
+
+      // Crear URL compatible con móvil
+      const webviewPath = `data:image/jpeg;base64,${capturedPhoto.base64String}`;
+
+      const photoData: PhotoData = {
+        webviewPath,
+        base64: capturedPhoto.base64String
+      };
+
+      this.photos.unshift(photoData);
+      await this.saveToStorage();
+
+      return photoData;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al tomar foto';
+      console.error('Error en addNewToGallery:', errorMessage);
+      alert(errorMessage);
       return null;
     }
   }
 
-  private async savePhoto(photo: Photo): Promise<{ filePath: string; webviewPath: string; base64: string }> {
-    const fileName = `${new Date().getTime()}.jpeg`;
-    const base64Data = await this.readAsBase64(photo);
-
-    const savedFile = await Filesystem.writeFile({
-      path: `photos/${fileName}`,
-      data: base64Data,
-      directory: Directory.Data
-    });
-
-    return {
-      filePath: savedFile.uri, // Ruta del archivo en el almacenamiento de la app
-      webviewPath: photo.webPath || '', // URL web (para iOS y Android, no PWA)
-      base64: base64Data // Imagen en formato Base64 (para PWA)
-    };
+  async loadStoredPhotos(): Promise<void> {
+    try {
+      const { value } = await Preferences.get({ key: 'photos' });
+      const parsedPhotos = value ? JSON.parse(value) as PhotoData[] : [];
+      
+      // Asegurar que todas las fotos tengan el formato correcto
+      this.photos = parsedPhotos.map(photo => {
+        if (photo.base64 && !photo.webviewPath?.startsWith('data:image/')) {
+          return {
+            ...photo,
+            webviewPath: `data:image/jpeg;base64,${photo.base64}`
+          };
+        }
+        return photo;
+      });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al cargar fotos';
+      console.error('Error al cargar fotos almacenadas:', errorMessage);
+      this.photos = [];
+    }
   }
 
-  private async readAsBase64(photo: Photo): Promise<string> {
-    const response = await fetch(photo.webPath!);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-    });
+  private async saveToStorage(): Promise<void> {
+    try {
+      await Preferences.set({
+        key: 'photos',
+        value: JSON.stringify(this.photos)
+      });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al guardar fotos';
+      console.error('Error al guardar fotos:', errorMessage);
+    }
   }
 
-  async loadStoredPhotos() {
-    const storedPhotos = await Preferences.get({ key: 'photos' });
-    this.photos = storedPhotos.value ? JSON.parse(storedPhotos.value) : [];
+  async deletePhoto(index: number): Promise<void> {
+    if (index >= 0 && index < this.photos.length) {
+      this.photos.splice(index, 1);
+      await this.saveToStorage();
+    }
+  }
+
+  async clearPhotos(): Promise<void> {
+    this.photos = [];
+    await Preferences.remove({ key: 'photos' });
   }
 }
