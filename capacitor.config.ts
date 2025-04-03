@@ -10,6 +10,16 @@ const config: CapacitorConfig = {
     },
     PushNotifications:{
       presentationOptions: ["badge", "sound", "alert"]
+    },
+    SplashScreen: {
+      launchShowDuration: 3000,
+      backgroundColor: "#000000FF", // Negro con alpha (formato ARGB)
+      androidSplashResourceName: "splash",
+      androidScaleType: "CENTER_CROP",
+      showSpinner: true, // Cambia a true para mostrar spinner
+      spinnerColor: "#FFFFFF", // Color blanco
+      splashFullScreen: true,
+      splashImmersive: false,
     }
   }
 };

@@ -1,3 +1,10 @@
 <ion-app>
+  <!-- Overlay de carga (opcional) -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <p>Cargando...</p>
+    </div>
+  </div>
+  
   <ion-router-outlet></ion-router-outlet>
 </ion-app>
