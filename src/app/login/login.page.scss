@@ -1,0 +1,15 @@
+.login-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 16px;
+
+    ion-card {
+        margin-top: 32px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+}

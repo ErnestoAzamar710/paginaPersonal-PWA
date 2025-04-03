@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
-import { IonicModule, NavController } from '@ionic/angular'; 
+import { Component, OnInit } from '@angular/core';
+import { IonicModule, NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { getAuth } from 'firebase/auth';
+import { Preferences } from '@capacitor/preferences'; // Para verificar almacenamiento local
 
 @Component({
   selector: 'app-tabs',
@@ -9,14 +10,13 @@ import { getAuth } from 'firebase/auth';
   styleUrls: ['tabs.page.scss'],
   standalone: false,
 })
-export class TabsPage {
+export class TabsPage implements OnInit {
   constructor(private router: Router) {}
 
-  ngOnInit() {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) {
-      this.router.navigate(['/login']);
+  async ngOnInit() {
+    const { value } = await Preferences.get({ key: 'user' });
+    if (!value) {
+      this.router.navigate(['/login'], { replaceUrl: true });
     }
   }
 }

@@ -1,18 +1,29 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PhotoService } from '../services/photo.service';
-
+import { Preferences } from '@capacitor/preferences';
+import { getAuth, signOut } from 'firebase/auth';
+import { NavController } from '@ionic/angular'; // Importar NavController para redirigir
+interface Persona {
+  nombre: string;
+  clase: string;
+  genero: string;
+  fecha: string;
+  puntosDeVida: number;
+  fuerza: number;
+  foto: string;
+}
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss'],
   standalone: false,
 })
-export class Tab2Page {
-  personas: any[] = [];
+export class Tab2Page implements OnInit {
+  personas: Persona[] = [];
   showModal: boolean = false;
   editIndex: number | null = null;
 
-  persona = {
+  persona: Persona = {
     nombre: '',
     clase: '',
     genero: '',
@@ -22,10 +33,19 @@ export class Tab2Page {
     foto: ''
   };
 
-  constructor(public photoService: PhotoService) {}
+  constructor(
+    public photoService: PhotoService,
+    private navCtrl: NavController,
+    private cdRef: ChangeDetectorRef
+  ) {}
 
-  openModal(index: number | null = null) {
-    if (this.showModal) return; // Evita abrir múltiples modales
+  async ngOnInit(): Promise<void> {
+    await this.photoService.loadStoredPhotos();
+    this.personas = await this.loadPersonas();
+  }
+
+  openModal(index: number | null = null): void {
+    if (this.showModal) return;
 
     this.editIndex = index;
     if (index !== null) {
@@ -36,20 +56,30 @@ export class Tab2Page {
     this.showModal = true;
   }
 
-  closeModal() {
+  closeModal(): void {
     this.showModal = false;
     this.clearForm();
   }
 
-  async addPhotoToGallery() {
-    await this.photoService.addNewToGallery();
-    if (this.photoService.photos.length > 0) {
-      this.persona.foto = this.photoService.photos[0].webviewPath || '';
-      this.photoService.photos = [this.photoService.photos[0]];
+  async addPhotoToGallery(): Promise<void> {
+    try {
+      const newPhoto = await this.photoService.addNewToGallery();
+      
+      if (!newPhoto) {
+        alert('No se pudo obtener la foto.');
+        return;
+      }
+      
+      this.persona.foto = newPhoto.webviewPath;
+      this.cdRef.detectChanges();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al acceder a la cámara';
+      console.error('Error en addPhotoToGallery:', errorMessage);
+      alert(errorMessage);
     }
   }
 
-  savePerson() {
+  savePerson(): void {
     if (!this.validateForm()) {
       alert('Todos los campos son obligatorios y debes tomar una foto.');
       return;
@@ -62,13 +92,17 @@ export class Tab2Page {
     }
 
     this.closeModal();
+    this.savePersonas();
   }
 
-  deletePerson(index: number) {
-    this.personas.splice(index, 1);
+  deletePerson(index: number): void {
+    if (index >= 0 && index < this.personas.length) {
+      this.personas.splice(index, 1);
+      this.savePersonas();
+    }
   }
 
-  validateForm() {
+  validateForm(): boolean {
     return (
       this.persona.nombre.trim() !== '' &&
       this.persona.clase.trim() !== '' &&
@@ -80,7 +114,7 @@ export class Tab2Page {
     );
   }
 
-  clearForm() {
+  clearForm(): void {
     this.persona = {
       nombre: '',
       clase: '',
@@ -90,6 +124,53 @@ export class Tab2Page {
       fuerza: 0,
       foto: ''
     };
-    this.photoService.photos = [];
+  }
+
+  async loadPersonas(): Promise<Persona[]> {
+    try {
+      const { value } = await Preferences.get({ key: 'personas' });
+      if (!value) return [];
+
+      const parsed = JSON.parse(value) as Persona[];
+      return parsed.map(p => ({
+        ...p,
+        foto: p.foto?.startsWith('data:image/') ? p.foto : `data:image/jpeg;base64,${p.foto}`
+      }));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al cargar personas';
+      console.error('Error al cargar personas:', errorMessage);
+      return [];
+    }
+  }
+
+  async savePersonas(): Promise<void> {
+    try {
+      await Preferences.set({
+        key: 'personas',
+        value: JSON.stringify(this.personas)
+      });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al guardar personas';
+      console.error('Error al guardar personas:', errorMessage);
+    }
+  }
+
+  async logout(): Promise<void> {
+    const auth = getAuth();
+    
+    try {
+      await signOut(auth);
+      await Preferences.remove({ key: 'user' });
+      this.navCtrl.navigateRoot('/login');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al cerrar sesión';
+      console.error('Error al cerrar sesión:', errorMessage);
+    }
+  }
+
+  handleImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'assets/img/default.jpg';
+    imgElement.onerror = null; // Prevenir bucle infinito
   }
 }

@@ -1,11 +1,49 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>login</ion-title>
+    <ion-title>Login</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content>
   <div class="login-container">
-    <ion-button expand="full" (click)="signInWithGoogle()">Login with Google</ion-button>
+    <ion-card>
+      <ion-card-content>
+        <form (submit)="login()">
+          <ion-item>
+            <ion-label position="floating" for="nameInput">Nombre</ion-label>
+            <ion-input 
+              id="nameInput"
+              [(ngModel)]="user.displayName"
+              name="displayName"
+              required
+              aria-required="true"
+              autocomplete="name"
+            ></ion-input>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label position="floating" for="emailInput">Email</ion-label>
+            <ion-input 
+              id="emailInput"
+              type="email"
+              [(ngModel)]="user.email"
+              name="email"
+              required
+              aria-required="true"
+              autocomplete="email"
+              inputmode="email"
+            ></ion-input>
+          </ion-item>
+          
+          <ion-button 
+            expand="block" 
+            type="submit"
+            aria-label="Iniciar sesión"
+          >
+            Entrar
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>

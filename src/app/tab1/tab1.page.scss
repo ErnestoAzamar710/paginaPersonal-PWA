@@ -1,43 +1,84 @@
 .user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  height: calc(100% - 56px); // Ajuste para el header
+  justify-content: center;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 400px; // Limitar ancho máximo
+}
+
+.user-avatar {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  border: 3px solid var(--ion-color-primary);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   
-  .user-details {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  img {
+    object-fit: cover;
   }
-  
-  .user-avatar {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 15px;
-  }
-  
-  .user-text {
-    margin-top: 10px;
-  }
-  
-  .user-text h2 {
+}
+
+.user-text {
+  margin-top: 15px;
+  width: 100%;
+
+  h2 {
     font-size: 1.5rem;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    color: var(--ion-color-dark);
+    font-weight: 600;
   }
-  
-  .user-text p {
+
+  p {
     font-size: 1rem;
-    color: #555;
+    color: var(--ion-color-medium);
+    margin: 8px 0;
+    word-break: break-word;
+  }
+}
+
+.login-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  height: calc(100% - 56px); // Ajuste para el header
+  
+  h2 {
+    font-size: 1.5rem;
+    color: var(--ion-color-dark);
+    margin-bottom: 10px;
   }
   
-  .login-message {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
+  p {
+    font-size: 1rem;
+    color: var(--ion-color-medium);
+    margin-bottom: 20px;
   }
-  
+}
+
+ion-fab {
+  margin-bottom: 20px; // Espacio adicional en la parte inferior
+}
+
+// Estilo para el UID
+.user-text p:last-child {
+  font-family: monospace;
+  font-size: 0.9rem;
+  background: var(--ion-color-light);
+  padding: 5px 10px;
+  border-radius: 4px;
+  display: inline-block;
+}

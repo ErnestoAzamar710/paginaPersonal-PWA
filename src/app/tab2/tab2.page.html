@@ -5,20 +5,26 @@
 </ion-header>
 
 <ion-content>
+  <!-- Grid de personas -->
   <ion-grid>
     <ion-row>
       <ion-col size="12" size-sm="6" size-md="4" size-lg="3" *ngFor="let persona of personas; index as i">
         <ion-card>
-          <img [src]="persona.foto" alt="Foto" style="width: 100%;" />
+          <!-- Imagen de la persona -->
+          <img *ngIf="persona.foto" [src]="persona.foto" alt="Foto de la persona">
+          
           <ion-card-header>
             <ion-card-title>{{ persona.nombre }}</ion-card-title>
             <ion-card-subtitle><strong>Clase:</strong> {{ persona.clase }}</ion-card-subtitle>
           </ion-card-header>
+          
           <ion-card-content>
             <p><strong>Género:</strong> {{ persona.genero }}</p>
             <p><strong>Fecha:</strong> {{ persona.fecha }}</p>
             <p><strong>PV:</strong> {{ persona.puntosDeVida }} | <strong>Fuerza:</strong> {{ persona.fuerza }}</p>
           </ion-card-content>
+
+          <!-- Botones de editar y eliminar -->
           <ion-button fill="clear" (click)="openModal(i)">Editar</ion-button>
           <ion-button fill="clear" color="danger" (click)="deletePerson(i)">Eliminar</ion-button>
         </ion-card>
@@ -26,23 +32,28 @@
     </ion-row>
   </ion-grid>
 
+  <!-- Botón flotante para agregar nueva persona -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="openModal()" color="success">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
+    <br>
+    <ion-fab-button color="danger" (click)="logout()">
+      <ion-icon name="exit"></ion-icon>
+    </ion-fab-button>
   </ion-fab>
 
-  <!-- Modal HTML -->
+  <!-- Modal para agregar/editar persona -->
   <div class="modal-overlay" *ngIf="showModal">
     <div class="modal">
       <h2>{{ editIndex !== null ? 'Editar Persona' : 'Agregar Persona' }}</h2>
 
       <form>
+        <!-- Campos del formulario -->
         <label>Nombre:</label>
         <input type="text" [(ngModel)]="persona.nombre" name="nombre" required />
 
-        <!-- <label>Clase:</label>
-        <input type="text" [(ngModel)]="persona.clase" name="clase" required /> -->
+        <!-- Selector de clase -->
         <label>Clase:</label>
         <select [(ngModel)]="persona.clase" name="clase" required>
           <option value="" disabled selected>Seleccione una clase</option>
@@ -57,6 +68,7 @@
           <option value="Prefiero no decir">Prefiero no decir</option>
         </select>
 
+        <!-- Selector de género -->
         <label>Género:</label>
         <select [(ngModel)]="persona.genero" name="genero" required>
           <option value="" disabled selected>Seleccione un género</option>
@@ -65,21 +77,26 @@
           <option value="Prefiero no decir">Prefiero no decir</option>
         </select>
 
+        <!-- Campo de fecha -->
         <label>Fecha de nacimiento:</label>
         <input type="date" [(ngModel)]="persona.fecha" name="fecha" required />
 
+        <!-- Campo de puntos de vida -->
         <label>Puntos de Vida:</label>
         <input type="number" [(ngModel)]="persona.puntosDeVida" name="puntosDeVida" min="1" max="100" required />
 
+        <!-- Campo de fuerza -->
         <label>Fuerza:</label>
         <input type="number" [(ngModel)]="persona.fuerza" name="fuerza" min="1" max="100" required />
 
+        <!-- Sección de foto -->
         <label>Foto:</label>
         <div class="photo-container">
-          <img *ngIf="persona.foto" [src]="persona.foto" alt="Foto tomada" />
+          <img [src]="persona.foto" loading="lazy" alt="Foto" *ngIf="persona.foto">
           <ion-button (click)="addPhotoToGallery()" color="warning">Tomar foto</ion-button>
         </div>
 
+        <!-- Acciones del modal -->
         <div class="modal-actions">
           <ion-button (click)="closeModal()" color="danger">Cancelar</ion-button>
           <ion-button (click)="savePerson()" color="success">Guardar</ion-button>
